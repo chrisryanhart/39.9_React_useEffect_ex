@@ -1,14 +1,13 @@
 import React from 'react';
 import './App.css';
-import TodoList from './TodoList';
+import CardGame from './CardGame';
 
 
 function App() {
   return (
     <div className="App">
-      <TodoList/>
+      <CardGame/>
     </div>
   );
 }
-
 export default App;
