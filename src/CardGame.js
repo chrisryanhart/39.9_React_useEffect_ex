@@ -12,68 +12,54 @@ function CardGame() {
     const [card, setCard] = useState(null);
     const [url, setUrl] = useState(null);
 
-    // unmount the timer upon termination
-
-    // what will the callback function be?
-    // two states for drawing: t or f
-
-
 
     useEffect(function getDeckWhenMounted(){
         async function getDeck(){
             const deck = await axios.get('https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1');
             const deckId = deck.data.deck_id;
             setDeckId(deckId);
+            setUrl(`https://deckofcardsapi.com/api/deck/${deckId}/draw/?count=4`);
+
             return deckId;
         }
         getDeck();
     },[]);
 
     useEffect(function drawCardInt(){
-        drawTimer.current = setInterval(async () => {
-            const res = await axios.get(url);
-            const newCard = res.data.cards[0].image;
-            console.log(res.data.remaining);
-            // could call from existing callback function
-            setCard(newCard);
-        }, 1000);
+        if(toggleStatus){
+            drawTimer.current = setInterval(async () => {
+                const res = await axios.get(url);
 
-        return function cleanUpClearTime() {
-            console.log('Unmount timer', drawTimer.current);
+                if(!res.data.success) {
+                    clearInterval(drawTimer.current);
+                    return alert('Error: no cards remaining!')
+                }
+
+                const newCard = res.data.cards[0].image;
+
+                console.log(`In set interval `,drawTimer.current);
+
+                setCard(newCard);
+            }, 1000);
+        }
+
+        console.log(`in drawCardInt`, drawTimer.current);
+
+        return () => {
+            console.log(`in return function`, drawTimer.current);
             clearInterval(drawTimer.current);
         }
-    }, [url]);
 
-    console.log(toggleStatus);
-    // use toggle status to remove listner
+    }, [toggleStatus,url]);
+
+    
 
     const toggleDraw = () => {
-        if (toggleStatus) {
-            clearInterval(drawTimer.current);
-        }    
-        console.log(drawTimer);
-        setUrl(`https://deckofcardsapi.com/api/deck/${deckId}/draw/?count=4`);
+
         setToggleStatus(!toggleStatus);
-        console.log('test');
-
     }
-    // console.log(drawTimer);
 
-    // change to start an interval
-    // use setRef for the timer
 
-    // const drawCard = async () => {
-    //     const res = await axios.get(`https://deckofcardsapi.com/api/deck/${deckId}/draw/?count=4`);
-
-    //     if(!res.data.success) {
-    //         return alert('Error: no cards remaining!')
-    //     }
-
-    //     console.log(res.data.remaining);
-    //     const newCard = res.data.cards[0].image;
-    //     setCard(newCard);
-    // }
-    // onClick={drawCard}
     
     return (
       <>
